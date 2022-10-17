@@ -1,18 +1,24 @@
 import React from 'react';
-import {useForm, SubmitHandler} from 'react-hook-form';
+import {useForm, SubmitHandler, FormProvider} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import SubComponent1 from '../components/SubComponent1';
+import SubComponent2 from '../components/SubComponent2';
 
 interface IFormInputs {
   email: string;
   password: string;
 }
+// validation with yup
+const schema = yup.object().shape({
+  email: yup.string().email().required(),
+  password: yup.string().min(8).max(20).required(),
+});
 
 const Home = () => {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: {errors},
-  } = useForm<IFormInputs>();
+  const methods = useForm<IFormInputs>({
+    resolver: yupResolver(schema),
+  });
 
   const formSubmitHandler: SubmitHandler<IFormInputs> = (data: IFormInputs) => {
     console.log(data);
@@ -20,15 +26,15 @@ const Home = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(formSubmitHandler)}>
-        <input defaultValue="example@asd.com" {...register('email')} />
-        <br />
-        <br />
-        <input type="password" {...register('password', {required: true})} />
-        <br />
-        <br />
-        <button type="submit">Submit</button>
-      </form>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(formSubmitHandler)}>
+          <SubComponent1 />
+          <br />
+          <SubComponent2 />
+
+          <button type="submit">Submit</button>
+        </form>
+      </FormProvider>
     </div>
   );
 };
